@@ -4,7 +4,6 @@ class MockAsyncSession:
     async def commit(self):
         pass
     async def close(self):
-        # Added explicit stars so you can spot it easily
         print("\n**************************************************")
         print("[DATABASE] AsyncSessionLocal successfully closed.")
         print("**************************************************\n")
