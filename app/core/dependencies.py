@@ -1,19 +1,19 @@
-import logging
+# app/core/dependencies.py
+import os
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from app.core.config import settings
 
-class MockAsyncSession:
-    async def commit(self):
-        pass
-    async def close(self):
-        print("\n**************************************************")
-        print("[DATABASE] AsyncSessionLocal successfully closed.")
-        print("**************************************************\n")
+# Initialize the asynchronous database engine with pooling configurations
+engine = create_async_engine(
+    settings.db_url, 
+    pool_pre_ping=True, 
+    pool_size=10
+)
 
-async def get_db():
-    print("\n**************************************************")
-    print("[DATABASE] Request received: Opening fresh AsyncSessionLocal...")
-    print("**************************************************\n")
-    session = MockAsyncSession()
-    try:
-        yield session
-    finally:
-        await session.close()
+# Create a session factory for generating localized session workers
+AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+
+async def get_db() -> AsyncSession:
+    """FastAPI dependency yielding an asynchronous database session lifecycle."""
+    async with AsyncSessionLocal() as session:
+        yield session  # Ensures the session closes cleanly after the request completes

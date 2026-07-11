@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, status, Form, UploadFile, File, HTTPException
+# app/api/v1/routers/manuscripts.py
+from fastapi import APIRouter, Depends, UploadFile, File, status
 from app.core.dependencies import get_db
-from app.schemas.manuscripts import ManuscriptCreate
+from app.repositories.manuscript_repo import ManuscriptRepository
+from app.core.storage import save_manuscript_file  # Import your storage asset
 
 router = APIRouter(prefix='/manuscripts', tags=['Manuscripts'])
 
@@ -8,34 +10,24 @@ router = APIRouter(prefix='/manuscripts', tags=['Manuscripts'])
 async def get_manuscripts_stub():
     return {"message": "Manuscripts fetch stub working"}
 
-# Older JSON payload endpoint
-@router.post('/', status_code=status.HTTP_201_CREATED)
-async def submit_manuscript(payload: ManuscriptCreate, db=Depends(get_db)):
-    print(f"[ROUTE] Passed advanced validation for manuscript: {payload.title}")
-    return {
-        "message": "Manuscript advanced validation successful!",
-        "title": payload.title,
-        "orcid_validated": payload.orcid
-    }
+@router.get('/repo-test/{ms_id}')
+async def test_repository_layer(ms_id: int, db=Depends(get_db)):
+    repo = ManuscriptRepository(db)
+    manuscript = await repo.get_by_id(ms_id)
+    if not manuscript:
+        from app.core.exceptions import ManuscriptNotFoundError
+        raise ManuscriptNotFoundError(manuscript_id=ms_id)
+    return {"message": "Repository query successfully processed cleanly!", "data": manuscript}
 
-# NEW: Day 5 Endpoint handling combined Form fields and File Uploads
-@router.post('/submit-with-file', status_code=status.HTTP_201_CREATED)
-async def submit_manuscript_with_file(
-    title: str = Form(...),                        # Text input from a form field
-    manuscript_file: UploadFile = File(...),       # File input
-    db=Depends(get_db)
-):
-    # Enforce standard VNIAS security constraint: Only PDF files accepted
-    if manuscript_file.content_type != "application/pdf":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Invalid file type. Only PDF files are accepted."
-        )
-        
-    print(f"[ROUTE] Form received: Title='{title}' | File='{manuscript_file.filename}'")
+# --- Brand New Week 2 File Upload Testing Endpoint ---
+@router.post('/upload', status_code=status.HTTP_201_CREATED)
+async def upload_manuscript_document(file: UploadFile = File(...)):
+    # Pass incoming file straight to your sandboxed storage utility engine
+    saved_path = await save_manuscript_file(file)
+    
     return {
-        "message": "Form text and file uploaded successfully!",
-        "received_title": title,
-        "filename": manuscript_file.filename,
-        "content_type": manuscript_file.content_type
+        "status": "success",
+        "filename": file.filename,
+        "saved_location": saved_path,
+        "message": "File successfully isolated and stored inside the WP Arena sandbox environment."
     }
