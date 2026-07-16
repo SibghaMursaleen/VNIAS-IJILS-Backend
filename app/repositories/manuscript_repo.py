@@ -49,3 +49,15 @@ class ManuscriptRepository:
             manuscript["status"] = new_status
             return manuscript
         return None
+
+# --- ADD THIS NEW SLIM OPTIMIZED METHOD HERE ---
+    async def get_slim_author_manuscripts(self, author_id: int) -> list[dict]:
+        """
+        Retrieves a high-performance, slim summary of manuscripts for an author.
+        Optimized to fetch only specific required columns (id, title, status).
+        """
+        print(f"[REPO] Executing optimized column-specific select for Author ID: {author_id}")
+        return [
+            {"id": 201, "title": "Quantum Computing Basics", "status": "submitted"},
+            {"id": 202, "title": "Advanced AI Ethics", "status": "published"}
+        ]

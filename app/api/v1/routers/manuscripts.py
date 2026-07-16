@@ -31,3 +31,19 @@ async def upload_manuscript_document(file: UploadFile = File(...)):
         "saved_location": saved_path,
         "message": "File successfully isolated and stored inside the WP Arena sandbox environment."
     }
+# app/api/v1/routers/manuscripts.py (Append to the bottom)
+
+@router.get('/author/{author_id}/slim')
+async def get_slim_manuscripts(author_id: int, db=Depends(get_db)):
+    """
+    Performance-optimized endpoint returning only essential metadata columns 
+    to reduce system payload size.
+    """
+    repo = ManuscriptRepository(db)
+    slim_data = await repo.get_slim_author_manuscripts(author_id)
+    return {
+        "status": "success",
+        "author_id": author_id,
+        "count": len(slim_data),
+        "data": slim_data
+    }
