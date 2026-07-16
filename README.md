@@ -41,23 +41,31 @@ During the opening week, the focus was on setting up the initial network routing
 
 | Feature Area | Component | Description | Key Files |
 |--------------|-----------|-------------|-----------|
-| **Asynchronous Route Scaffold** | Network Routing | Created decoupled endpoints for users, manuscripts, and announcements. | `app/api/v1/routers/` |
-| **Performance Logging Middleware** | Request Monitoring | Engineered a custom interceptor that computes HTTP request execution times in milliseconds ($ms$) and logs status codes. | `app/main.py` |
-| **Uvicorn Web Server Integration** | Web Hosting Pipeline | Established the local hosting configuration running on port `8080` with hot-reloading active. | Root setup |
+| **Asynchronous Route Scaffold** | Network Routing | Created decoupled **asynchronous endpoints** for `users`, `manuscripts`, and `announcements`. | `app/api/v1/routers/` |
+| **Performance Logging Middleware** | Request Monitoring | Engineered a custom interceptor that computes **HTTP request execution times** in milliseconds (`ms`) and logs **response status codes**. | `app/main.py` |
+| **Uvicorn Web Server Integration** | Web Hosting Pipeline | Established the local web server configuration running on port `8080` with **hot-reloading** enabled. | Root setup |
 
 ### 🔒 Week 2: Advanced Security, Repositories, & Fail-Safes
 This milestone introduced security firewalls, memory optimization, data abstraction layers, and unified exception systems:
 
 | Feature Area | Component | Description | Key Files |
 |--------------|-----------|-------------|-----------|
-| **Type-Safe Environment Variables** | Security & Configuration | Built a fast-failing configuration loader using `pydantic-settings` to block startup if environment variables are missing. | `app/core/config.py` |
-| **Dynamic CORS Security** | Security & Configuration | Integrated a dynamic domain firewall using FastAPI `CORSMiddleware`, reading origins from custom parameters. | `app/main.py` |
-| **Native Cryptographic Encryption** | Security & Configuration | Implemented secure, one-way password hashing using native `bcrypt` binaries to scramble user credentials. | `app/core/security.py` |
-| **The Repository Pattern** | Data & Memory Performance | Decoupled database operations from routers into the `ManuscriptRepository` class. | `app/repositories/manuscript_repo.py` |
-| **Asynchronous Database Pooling** | Data & Memory Performance | Configured an async database session factory `get_db` using `SQLAlchemy` to support warm connection pools. | `app/core/dependencies.py` |
-| **Fast In-Memory Caching** | Data & Memory Performance | Designed a simulated Redis key-value cache manager to serve repetitive data instantly from memory. | `app/core/cache.py` |
-| **Global Exception Management** | File Handling & Fail-Safes | Registered six centralized global exception handlers in `main.py` to map custom exceptions into structured JSON responses. | `app/core/exceptions.py`, `app/main.py` |
-| **WP Arena Streaming Storage Sandbox** | File Handling & Fail-Safes | Created a file upload handler that streams incoming files straight to disk storage to prevent RAM bloat. | `app/core/storage.py`, `app/api/v1/routers/manuscripts.py` |
+| **Type-Safe Environment Variables** | Security & Configuration | Built a fast-failing configuration loader using `pydantic-settings` to block startup if required **environment variables** are missing. | `app/core/config.py` |
+| **Dynamic CORS Security** | Security & Configuration | Integrated a dynamic **CORS domain firewall** using FastAPI `CORSMiddleware`, loading permitted origins from configurations. | `app/main.py` |
+| **Native Cryptographic Encryption** | Security & Configuration | Implemented secure, one-way password hashing using native `bcrypt` binaries to safely scramble **user credentials**. | `app/core/security.py` |
+| **The Repository Pattern** | Data & Memory Performance | Decoupled database operations from routers by implementing the `ManuscriptRepository` class to manage **data access**. | `app/repositories/manuscript_repo.py` |
+| **Asynchronous Database Pooling** | Data & Memory Performance | Configured an async database session factory `get_db` using `SQLAlchemy` to support warm **database connection pools**. | `app/core/dependencies.py` |
+| **Fast In-Memory Caching** | Data & Memory Performance | Designed a simulated **Redis key-value cache manager** to serve repetitive data instantly from memory. | `app/core/cache.py` |
+| **Global Exception Management** | File Handling & Fail-Safes | Registered six centralized **global exception handlers** in `main.py` to map custom exceptions into structured JSON responses. | `app/core/exceptions.py`, `app/main.py` |
+| **WP Arena Streaming Storage Sandbox** | File Handling & Fail-Safes | Created a file upload handler that streams incoming files straight to disk storage to prevent **RAM bloat** during file transfer. | `app/core/storage.py`, `app/api/v1/routers/manuscripts.py` |
+
+### ⚡ Week 3: Performance Optimization & Slim Data Retrieval
+This milestone focused on database performance tuning and reducing payload sizes for client applications by implementing column-specific data retrieval:
+
+| Feature Area | Component | Description | Key Files |
+|--------------|-----------|-------------|-----------|
+| **Slim Metadata Endpoint** | Network Routing | Exposed a performance-optimized `/author/{author_id}/slim` router endpoint that returns essential fields only to minimize **payload size**. | `app/api/v1/routers/manuscripts.py` |
+| **Optimized Column Querying** | Data & Memory Performance | Implemented `get_slim_author_manuscripts` in the `ManuscriptRepository` class, querying only specific required columns (`id`, `title`, `status`) to avoid **full model loading**. | `app/repositories/manuscript_repo.py` |
 
 ---
 
